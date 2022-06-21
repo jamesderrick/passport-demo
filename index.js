@@ -44,9 +44,13 @@ app.get('/not-protected', (req,res) => {
 })
 
 app.get('/logout', (req,res) => {
-    req.logout();
-    req.session.destroy()
-    res.send('Goodbye!')
+    req.logout(function(err) {
+        if(err) {
+            return next(err)
+        }
+        req.session.destroy()
+        res.send('Goodbye!')
+    });
 })
 
 app.listen(port, () => {
