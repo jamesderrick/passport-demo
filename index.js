@@ -6,10 +6,13 @@ require('./auth');
 
 function isLoggedIn (req, res, next) {
     console.log(req.user)
-    req.user ? next() : res.sendStatus(401)
+    req.user ? next() : res.status(401).render("access-denied", { user: '' })
 }
 
 const app = express()
+app.set("view engine","ejs");
+
+app.use(express.static("public"));
 app.use(session({secret: process.env.SESSION_SECRET}));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -17,7 +20,10 @@ app.use(passport.session());
 const port = process.env.PORT || 5001;
 
 app.get('/', (req,res) => {
-    res.send('<a href="/auth/azure">Authenticate with Azure</a>')
+    console.log(req.user)
+    res.render("home", {
+        user: req.user
+    })
 })
 
 app.get('/auth/azure',
@@ -26,7 +32,7 @@ app.get('/auth/azure',
 
 app.get('/auth/azure/callback',
     passport.authenticate('azure_ad_oauth2', {
-        successRedirect: '/protected',
+        successRedirect: '/',
         failureRedirect: '/'
     })
 )
@@ -36,11 +42,15 @@ app.get('/auth/failure', (req,res) => {
 })
 
 app.get('/protected', isLoggedIn, (req,res) => {
-    res.send(`Hello ${req.user.given_name} ${req.user.family_name}!`)
+    res.render("protected", {
+        user: req.user
+    })
 })
 
 app.get('/not-protected', (req,res) => {
-    res.send("Everyone is welcome")
+    res.render("public", {
+        user: req.user
+    })
 })
 
 app.get('/logout', (req,res) => {
@@ -49,7 +59,9 @@ app.get('/logout', (req,res) => {
             return next(err)
         }
         req.session.destroy()
-        res.send('Goodbye!')
+        res.render("Logout", {
+            user: ''
+        })
     });
 })
 

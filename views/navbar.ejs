@@ -1,0 +1,10 @@
+<nav>
+    <ul>
+        <li><a href="/">Home</a></li>
+        <% if (user) { %>
+        <li><a href="/logout">Log Out</a></li>
+        <% } else { %>
+        <li><a href="/auth/azure">Log In</a></li>
+        <% } %>
+    </ul>
+</nav>
